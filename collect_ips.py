@@ -30,7 +30,6 @@ for url in urls:
         element_text = element.get_text()
         ip_matches = re.findall(ip_pattern, element_text)
         all_ip_matches.extend(ip_matches)
-
 # 限制最多8个元素
 all_ip_matches = all_ip_matches[:9]
 
@@ -40,6 +39,7 @@ try:
         original_lines = file.readlines()
 except FileNotFoundError:
     original_lines = []
+    
 # 写入文件，替换IP但保持原有格式
 with open('ip.txt', 'w') as file:
     # 如果原行数大于或等于获取的ip数量
