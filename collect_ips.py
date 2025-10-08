@@ -2,6 +2,7 @@ import os
 import requests
 from bs4 import BeautifulSoup
 import re
+
 # 最大ip数量
 max_ip_count = 8
 # 获取新的IP地址
@@ -15,49 +16,89 @@ if os.path.exists(log_file):
     os.remove(log_file)
 
 # table格式
-urls_table = ['https://ip.164746.xyz',"https://vps789.com/cfip/?remarks=ip",
+urls_table = ['https://ip.164746.xyz',"https://www.wetest.vip/page/cloudflare/address_v4.html",
     "https://api.uouin.com/cloudflare.html"]
 # 目标URL列表
-urls = ['https://ip.164746.xyz',"https://vps789.com/cfip/?remarks=ip"]
+urls = ['https://ip.164746.xyz',"https://www.wetest.vip/page/cloudflare/address_v4.html"]
 
 # 正则表达式用于匹配IP地址
 ip_pattern = r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
 
 for url in urls:
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text, 'html.parser')
+    try:
+        response = requests.get(url, timeout=10)
+        response.encoding = 'utf-8'
+        soup = BeautifulSoup(response.text, 'html.parser')
 
-    if url in urls_table:
-        elements = soup.find_all('tr')
-    else:
-        elements = soup.find_all('li')
+        if url in urls_table:
+            # 对于表格格式的网站，查找表格行
+            elements = soup.find_all('tr')
+            print(f"{url}: 找到 {len(elements)} 个表格行")
+            if "www.wetest.vip" not in url:
+                for element in elements:
+                    element_text = element.get_text()
+                    ip_matches = re.findall(ip_pattern, element_text)
+                    all_ip_matches.extend(ip_matches)
+                
+            else:
+                for element in elements:
+                    # 查找线路名称列
+                    line_name_td = element.find('td', {'data-label': '线路名称'})
+                    if line_name_td and '联通' in line_name_td.get_text():
+                        # 查找优选地址列
+                        ip_td = element.find('td', {'data-label': '优选地址'})
+                        if ip_td:
+                            ip_text = ip_td.get_text(strip=True)
+                            ip_matches = re.findall(ip_pattern, ip_text)
+                            if ip_matches:
+                                all_ip_matches.extend(ip_matches)
+                                print(f"找到联通IP: {ip_matches[0]}")
+        else:
+            # 对于列表格式的网站
+            elements = soup.find_all('li')
+            print(f"{url}: 找到 {len(elements)} 个列表项")
+            
+            for element in elements:
+                element_text = element.get_text()
+                ip_matches = re.findall(ip_pattern, element_text)
+                all_ip_matches.extend(ip_matches)
+            
+    except Exception as e:
+        print(f"处理 {url} 时出错: {e}")
+        continue
 
-    for element in elements:
-        element_text = element.get_text()
-        ip_matches = re.findall(ip_pattern, element_text)
-        all_ip_matches.extend(ip_matches)
+# 去重并限制数量
+all_ip_matches = list(set(all_ip_matches))  # 去重
+all_ip_matches = all_ip_matches[:max_ip_count]
+
+print(f"最终获取到 {len(all_ip_matches)} 个唯一IP: {all_ip_matches}")
 
 # 将所有获取的ip保存在 log_file中
-# 写入文件，替换IP但保持原有格式
-with open(log_file, 'w') as _file:
+with open(log_file, 'w', encoding='utf-8') as _file:
     _file.write('获取到的所有ip为:' + '\n')
     for ip in all_ip_matches:
         _file.write(ip + '\n')
-# list切片,只获取设置的数量ip
-all_ip_matches = all_ip_matches[:max_ip_count]
 
 # 读取原有文件内容
-try:
-    with open(ip_file, 'r') as file:
-        original_lines = file.readlines()
-    # 如果txt文件存在,读取后就删除它
-    if os.path.exists(ip_file):
-        os.remove(ip_file)
-except FileNotFoundError:
-    original_lines = []
-    
+original_lines = []
+if os.path.exists(ip_file):
+    try:
+        # 尝试多种编码
+        encodings = ['utf-8']
+        for encoding in encodings:
+            try:
+                with open(ip_file, 'r', encoding=encoding) as file:
+                    original_lines = file.readlines()
+                print(f"成功使用 {encoding} 编码读取文件")
+                break
+            except UnicodeDecodeError:
+                continue
+    except Exception as e:
+        print(f"读取文件时出错: {e}")
+        original_lines = []
+
 # 写入文件，替换IP但保持原有格式
-with open(ip_file, 'w') as file:
+with open(ip_file, 'w', encoding='utf-8') as file:
     # 如果原行数大于或等于获取的ip数量
     if len(all_ip_matches) <= len(original_lines):
         for i, line in enumerate(original_lines):
