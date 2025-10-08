@@ -9,7 +9,7 @@ all_ip_matches = []
 
 # 存放ip的文件
 ip_file = 'ip.txt'
-log_file =  'log.txt'
+log_file = 'log.txt'
 
 if os.path.exists(log_file):
     os.remove(log_file)
@@ -39,10 +39,10 @@ for url in urls:
 
 # 将所有获取的ip保存在 log_file中
 # 写入文件，替换IP但保持原有格式
-with open(ip_file, 'w') as log_file:
-    log_file.write('获取到的所有ip为:' + '\n')
+with open(log_file, 'w') as _file:
+    _file.write('获取到的所有ip为:' + '\n')
     for ip in all_ip_matches:
-        log_file.write(ip + '\n')
+        _file.write(ip + '\n')
 # list切片,只获取设置的数量ip
 all_ip_matches = all_ip_matches[:max_ip_count]
 
