@@ -6,6 +6,13 @@ max_ip_count = 8
 # 获取新的IP地址
 all_ip_matches = []
 
+# 存放ip的文件
+ip_file = 'ip.txt'
+log_file =  'log.txt'
+
+if os.path.exists(log_file):
+    os.remove(log_file)
+
 # table格式
 urls_table = ['https://ip.164746.xyz',"https://vps789.com/cfip/?remarks=ip",
     "https://api.uouin.com/cloudflare.html"]
@@ -28,18 +35,28 @@ for url in urls:
         element_text = element.get_text()
         ip_matches = re.findall(ip_pattern, element_text)
         all_ip_matches.extend(ip_matches)
+
+# 将所有获取的ip保存在 log_file中
+# 写入文件，替换IP但保持原有格式
+with open(ip_file, 'w') as log_file:
+    log_file.write('获取到的所有ip为:' + '\n')
+    for ip in all_ip_matches:
+        log_file.write(ip + '\n')
 # list切片,只获取设置的数量ip
 all_ip_matches = all_ip_matches[:max_ip_count]
 
 # 读取原有文件内容
 try:
-    with open('ip.txt', 'r') as file:
+    with open(ip_file, 'r') as file:
         original_lines = file.readlines()
+    # 如果txt文件存在,读取后就删除它
+    if os.path.exists(ip_file):
+        os.remove(ip_file)
 except FileNotFoundError:
     original_lines = []
     
 # 写入文件，替换IP但保持原有格式
-with open('ip.txt', 'w') as file:
+with open(ip_file, 'w') as file:
     # 如果原行数大于或等于获取的ip数量
     if len(all_ip_matches) <= len(original_lines):
         for i, line in enumerate(original_lines):
