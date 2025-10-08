@@ -1,7 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
 import re
-import os
 
 # 目标URL列表
 urls = [
@@ -16,33 +15,42 @@ urls_table = [
 # 正则表达式用于匹配IP地址
 ip_pattern = r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
 
-# 检查 ip.txt 文件是否存在,如果存在则删除它
-if os.path.exists('ip.txt'):
-    os.remove('ip.txt')
+# 获取新的IP地址
+all_ip_matches = []
+for url in urls:
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
 
-count = 0       # 全局计数器，记录第几个IP
-written = 0     # 已写入数量
+    if url in urls_table:
+        elements = soup.find_all('tr')
+    else:
+        elements = soup.find_all('li')
 
+    for element in elements:
+        element_text = element.get_text()
+        ip_matches = re.findall(ip_pattern, element_text)
+        all_ip_matches.extend(ip_matches)
+
+# 限制最多6个元素
+all_ip_matches = all_ip_matches[:6]
+
+# 读取原有文件内容
+try:
+    with open('ip.txt', 'r') as file:
+        original_lines = file.readlines()
+except FileNotFoundError:
+    original_lines = []
+# 写入文件，替换IP但保持原有格式
 with open('ip.txt', 'w') as file:
-    for url in urls:
-        response = requests.get(url)
-        soup = BeautifulSoup(response.text, 'html.parser')
-
-        if url in urls_table:
-            elements = soup.find_all('tr')
+    for i, line in enumerate(original_lines):
+        if i < len(all_ip_matches):
+            # 替换该行的IP地址
+            new_ip = all_ip_matches[i]
+            # 假设格式为 "IP#优选 序号 (IP)"
+            new_line = f"{new_ip}#优选 {i+1} ({new_ip})\n"
+            file.write(new_line)
         else:
-            elements = soup.find_all('li')
+            # 如果新IP数量少于原文件行数，保留原行
+            file.write(line)
 
-        for element in elements:
-            element_text = element.get_text()
-            ip_matches = re.findall(ip_pattern, element_text)
-
-            for ip in ip_matches:
-                count += 1
-                # 从第6个开始，只取偶数，最多8个
-                #if count >= 1 and (count % 2 == 0) and written < 8:
-                if count >= 1 and written <= 7:
-                    file.write(f"{ip}#优选 {written+1} ({ip})\n")
-                    written += 1
-
-print('IP地址已保存到 ip.txt 文件中。')
+print(f'IP地址已更新到 ip.txt 文件中。共获取 {len(all_ip_matches)} 个IP。')
