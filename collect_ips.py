@@ -4,15 +4,12 @@ import re
 # 最大ip数量
 max_ip_count = 8
 
+# 总url list
+urls_table = ['https://ip.164746.xyz',"https://vps789.com/cfip/?remarks=ip",
+    'https://api.uouin.com/cloudflare.html'
+]
 # 目标URL列表
-urls = [
-    'https://ip.164746.xyz',"https://vps789.com/cfip/?remarks=ip"
-]
-
-urls_table = [
-    'https://api.uouin.com/cloudflare.html',
-    'https://ip.164746.xyz'
-]
+urls = url_table[:2]
 
 # 正则表达式用于匹配IP地址
 ip_pattern = r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
