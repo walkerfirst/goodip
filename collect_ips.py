@@ -6,7 +6,7 @@ max_ip_count = 8
 
 # 目标URL列表
 urls = [
-    'https://ip.164746.xyz'
+    'https://ip.164746.xyz',"https://vps789.com/cfip/?remarks=ip"
 ]
 
 urls_table = [
