@@ -1,6 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
 import re
+# 最大ip数量
+max_ip_count = 8
 
 # 目标URL列表
 urls = [
@@ -30,8 +32,8 @@ for url in urls:
         element_text = element.get_text()
         ip_matches = re.findall(ip_pattern, element_text)
         all_ip_matches.extend(ip_matches)
-# 限制最多8个元素
-all_ip_matches = all_ip_matches[:9]
+# list切片,只获取设置的数量ip
+all_ip_matches = all_ip_matches[:max_ip_count]
 
 # 读取原有文件内容
 try:
@@ -53,7 +55,8 @@ with open('ip.txt', 'w') as file:
                 file.write(new_line)
             else:
                 # 如果新IP数量少于原文件行数，保留原行
-                file.write(line)
+                if i < max_ip_count:
+                    file.write(line)
     # 原文件行数小于获取的ip数量
     else:
         for j, ip in enumerate(all_ip_matches):
