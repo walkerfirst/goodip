@@ -3,19 +3,18 @@ from bs4 import BeautifulSoup
 import re
 # 最大ip数量
 max_ip_count = 8
+# 获取新的IP地址
+all_ip_matches = []
 
-# 总url list
+# table格式
 urls_table = ['https://ip.164746.xyz',"https://vps789.com/cfip/?remarks=ip",
-    'https://api.uouin.com/cloudflare.html'
-]
+    "https://api.uouin.com/cloudflare.html"]
 # 目标URL列表
 urls = url_table[:2]
 
 # 正则表达式用于匹配IP地址
 ip_pattern = r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
 
-# 获取新的IP地址
-all_ip_matches = []
 for url in urls:
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
