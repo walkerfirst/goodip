@@ -42,15 +42,22 @@ except FileNotFoundError:
     original_lines = []
 # 写入文件，替换IP但保持原有格式
 with open('ip.txt', 'w') as file:
-    for i, line in enumerate(original_lines):
-        if i < len(all_ip_matches):
-            # 替换该行的IP地址
-            new_ip = all_ip_matches[i]
-            # 假设格式为 "IP#优选 序号 (IP)"
-            new_line = f"{new_ip}#优选 {i+1} ({new_ip})\n"
-            file.write(new_line)
-        else:
-            # 如果新IP数量少于原文件行数，保留原行
-            file.write(line)
+    # 如果原行数大于或等于获取的ip数量
+    if len(all_ip_matches) <= len(original_lines):
+        for i, line in enumerate(original_lines):
+            if i < len(all_ip_matches):
+                # 替换该行的IP地址
+                new_ip = all_ip_matches[i]
+                # 假设格式为 "IP#优选 序号 (IP)"
+                new_line = f"{new_ip}#优选 {i+1} ({new_ip})\n"
+                file.write(new_line)
+            else:
+                # 如果新IP数量少于原文件行数，保留原行
+                file.write(line)
+    # 原文件行数小于获取的ip数量
+    else:
+        for j, ip in enumerate(all_ip_matches):
+            _line  = f"{ip}#优选 {j+1} ({ip})\n"
+            file.write(_line)
 
 print(f'IP地址已更新到 ip.txt 文件中。共获取 {len(all_ip_matches)} 个IP。')
