@@ -31,8 +31,8 @@ for url in urls:
         ip_matches = re.findall(ip_pattern, element_text)
         all_ip_matches.extend(ip_matches)
 
-# 限制最多6个元素
-all_ip_matches = all_ip_matches[:6]
+# 限制最多8个元素
+all_ip_matches = all_ip_matches[:9]
 
 # 读取原有文件内容
 try:
