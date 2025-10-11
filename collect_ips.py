@@ -7,6 +7,8 @@ import re
 max_ip_count = 8
 # 获取新的IP地址
 all_ip_matches = []
+# logs
+logs = []
 
 # 存放ip的文件
 ip_file = 'ip.txt'
@@ -35,12 +37,15 @@ for url in urls:
             elements = soup.find_all('tr')
             print(f"{url}: 找到 {len(elements)} 个表格行")
             if "www.wetest.vip" not in url:
+                logs.append('ip.164746.xyz所有ip:')
                 for element in elements:
                     element_text = element.get_text()
                     ip_matches = re.findall(ip_pattern, element_text)
                     all_ip_matches.extend(ip_matches)
-                
+                    logs.extend(ip_matches)
+                    
             else:
+                logs.append('wetest.vip所有ip:')
                 for element in elements:
                     # 查找线路名称列
                     line_name_td = element.find('td', {'data-label': '线路名称'})
@@ -52,6 +57,7 @@ for url in urls:
                             ip_matches = re.findall(ip_pattern, ip_text)
                             if ip_matches:
                                 all_ip_matches.extend(ip_matches)
+                                logs.extend(ip_matches)
                                 print(f"找到联通IP: {ip_matches[0]}")
         else:
             # 对于列表格式的网站
@@ -68,7 +74,7 @@ for url in urls:
         continue
 
 # 去重并限制数量
-all_ip_matches = list(set(all_ip_matches))  # 去重
+# all_ip_matches = list(set(all_ip_matches))  # 去重
 all_ip_matches = all_ip_matches[:max_ip_count]
 
 print(f"最终获取到 {len(all_ip_matches)} 个唯一IP: {all_ip_matches}")
@@ -76,8 +82,8 @@ print(f"最终获取到 {len(all_ip_matches)} 个唯一IP: {all_ip_matches}")
 # 将所有获取的ip保存在 log_file中
 with open(log_file, 'w', encoding='utf-8') as _file:
     _file.write('获取到的所有ip为:' + '\n')
-    for ip in all_ip_matches:
-        _file.write(ip + '\n')
+    for item in logs:
+        _file.write(item + '\n')
 
 # 读取原有文件内容
 original_lines = []
